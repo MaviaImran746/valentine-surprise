@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Valentine Journey</title>
+
+  <style>
+    :root{
+      --pink-bg: #ffe6eb;
+      --pink: #ff4d6d;
+      --rose: #d6336c;
+      --text: #5a2a3a;
+      --shadow: rgba(214, 51, 108, 0.22);
+      --btn-shadow: 0 12px 30px var(--shadow);
+      --radius: 14px;
+    }
+
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background-color: var(--pink-bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      overflow-x: hidden;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;                          /* keep content above hearts */
+      width: min(92vw, 780px);
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    h1 {
+      color: var(--rose);
+      font-size: clamp(1.6rem, 3.8vw, 2.4rem);
+      margin: 0 0 12px;
+    }
+    h2 {
+      color: var(--rose);
+      font-weight: normal;
+      margin: 10px 0 0;
+      font-size: clamp(1rem, 2.8vw, 1.4rem);
+    }
+    p { margin: 8px 0; line-height: 1.6; }
+
+    /* One screen at a time */
+    .screen {
+      display: none;
+      padding: 18px 14px 26px;
+      background: #fff7f9;
+      border-radius: var(--radius);
+      box-shadow: 0 10px 35px var(--shadow);
+      min-height: min(72vh, 700px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      animation: fadeIn 380ms ease both;
+      box-sizing: border-box;
+    }
+    .screen.visible { display: flex; }
+
+    /* Buttons */
+    .btn {
+      margin: 10px;
+      padding: 12px 22px;
+      font-size: clamp(1rem, 3vw, 1.15rem);
+      background-color: var(--pink);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: var(--btn-shadow);
+      transition: transform .12s ease, box-shadow .2s ease, background-color .2s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+
+    /* Valentine note (small + italic so it fits) */
+    .val-note {
+      font-style: italic;
+      font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+      color: #7a3a4d;
+      background: #fff;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px dashed #ffc0cb;
+      max-width: 60ch;
+    }
+
+    /* Image presentation */
+    .media {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;     /* center the image */
+    }
+    .hero-img {
+      display: block;
+      width: 100%;
+      max-width: min(92vw, 520px);
+      max-height: min(48vh, 520px);/* leaves room for title & button on small screens */
+      height: auto;
+      object-fit: contain;          /* show whole image without cropping */
+      border-radius: 16px;
+      box-shadow: 0 12px 36px var(--shadow);
+      background: #fff;
+      margin: 4px auto 8px;         /* small breathing room */
+    }
+
+    /* Screen 2 - moving "Yes" buttons area */
+    .playground {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      margin: 14px auto 0;
+      height: clamp(260px, 46vh, 420px);
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: inset 0 0 0 2px #ffe0e6;
+      overflow: hidden;
+    }
+    .yes-btn {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      transition: left 700ms ease, top 700ms ease, transform 300ms ease;
+      animation: bob 2.2s ease-in-out infinite;
+    }
+    #yes1 { left: 32%; top: 40%; }
+    #yes2 { left: 68%; top: 60%; }
+
+    .clicks-left {
+      font-size: 0.9rem;
+      color: #8a4a5b;
+      opacity: .9;
+    }
+
+    /* Floating hearts background */
+    .hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .heart {
+      position: absolute;
+      bottom: -40px;
+      opacity: 0.85;
+      animation: floatUp linear forwards;
+      filter: drop-shadow(0 6px 10px rgba(214, 51, 108, 0.25));
+      will-change: transform, opacity;
+    }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes floatUp { to { transform: translateY(-115vh); opacity: 0; } }
+    @keyframes bob { 0% { transform: translate(-50%,-50%) translateY(0); } 50% { transform: translate(-50%,-50%) translateY(-6px); } 100% { transform: translate(-50%,-50%) translateY(0); } }
+  </style>
+</head>
+
+<body>
+  <!-- Hearts background -->
+  <div class="hearts" id="hearts"></div>
+
+  <main class="app">
+    <!-- Screen 1 -->
+    <section id="screen1" class="screen visible" aria-live="polite">
+      <h1>Bubu!!! Mere dil ki shahzadi ❤️</h1>
+      <button class="btn" onclick="nextScreen(2)">Surprise</button>
+    </section>
+
+    <!-- Screen 2 -->
+    <section id="screen2" class="screen" aria-live="polite">
+      <h1>Will you be my valentine?</h1>
+      <p class="clicks-left" id="clickHint">Click any <b>Yes</b> — four times to continue 💘</p>
+      <div class="playground" id="valentinePlay">
+        <button id="yes1" class="btn yes-btn" onclick="yesClick(this)">Yes</button>
+        <button id="yes2" class="btn yes-btn" onclick="yesClick(this)">Yes</button>
+      </div>
+    </section>
+
+    <!-- Screen 3 -->
+    <section id="screen3" class="screen" aria-live="polite">
+      <h1>Awww Bubu!!! Mujy pta tha ap Yes py hi click karo gy 🙈</h1>
+      <button class="btn" onclick="nextScreen(4)">Valentine Note</button>
+    </section>
+
+    <!-- Screen 4 -->
+    <section id="screen4" class="screen" aria-live="polite">
+      <h1>My Valentine Note 💌</h1>
+      <div class="val-note">
+        <em>
+          Bubu!! Alhamdulillah 🌙✨ ..... Allah Pak ny mujhy ap jesi naimat shy nawaza.
+          Apko pta hein, meri in nazro mein is duniya ki sb sy khubsurat insan ap hein 💖.
+          Ap Allah ka khas tohfa hein mery liye 🎁.
+          Is Valentine Day py mein ap sy ye promise krta hu k hamesha apki aisy hi support
+          ban k apky shath khara rahu ga har mushkil waqt mein 🤝
+          aur apki smile ki wajah banu ga 😊. Apky hony sy meri zindagi ko Allah ny noor
+          sy bhar diya hai 🌟 aur meri rooh ko sukoon apki mojodgi sy mila hein 🕊️.
+          I Love You Shooo Much Bubu 💞
+        </em>
+      </div>
+      <button class="btn" onclick="nextScreen(5)">Now time for surprise</button>
+    </section>
+
+    <!-- Screen 5 -->
+    <section id="screen5" class="screen" aria-live="polite">
+      <h1>Choose your mystery box</h1>
+      <div>
+        <button class="btn" onclick="nextScreen(6)">Box A</button>
+        <button class="btn" onclick="nextScreen(7)">Box B</button>
+      </div>
+    </section>
+
+    <!-- Screen 6 (Gift A - Dairy Milk image) -->
+    <section id="screen6" class="screen" aria-live="polite">
+      <h1>Chocolate for my Bubu 🍫</h1>
+      <div class="media">
+        <img
+          src="dairy-milk-chocolate-collection_1.webp"
+          alt="Dairy Milk chocolate gift"
+          class="hero-img"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <button class="btn" onclick="nextScreen(7)">B b apka hi hai</button>
+    </section>
+
+    <!-- Screen 7 -->
+    <section id="screen7" class="screen" aria-live="polite">
+      <h1>Aram shy thora sha relax ho jaye.</h1>
+      <button class="btn" onclick="nextScreen(8)">Ab agy chalty hein</button>
+    </section>
+
+    <!-- Screen 8 -->
+    <section id="screen8" class="screen" aria-live="polite">
+      <h1>Ankhein to band krein 😌</h1>
+      <button class="btn" onclick="nextScreen(9)">Agy chalty hein</button>
+    </section>
+
+    <!-- Screen 9 -->
+    <section id="screen9" class="screen" aria-live="polite">
+      <h1>Dekhy Bubu ankhein to khuli hein 😊</h1>
+      <button class="btn" onclick="nextScreen(10)">Acha Bubu aa jaye</button>
+    </section>
+
+    <!-- Screen 10 (Final gift - Image B) -->
+    <section id="screen10" class="screen" aria-live="polite">
+      <h1>Your valentine gift</h1>
+      <div class="media">
+        <img
+          src="Picsart_26-02-14_06-06-15-581.jpg"
+          alt="Final valentine gift"
+          class="hero-img"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <h2>Always yours ❤️</h2>
+    </section>
+  </main>
+
+  <script>
+    /* ======= Navigation ======= */
+    function nextScreen(num) {
+      for (let i = 1; i <= 10; i++) {
+        const el = document.getElementById('screen' + i);
+        if (el) el.classList.remove('visible');
+      }
+      const next = document.getElementById('screen' + num);
+      if (next) next.classList.add('visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ======= Hearts shower ======= */
+    (function heartsShower() {
+      const heartsC = document.getElementById('hearts');
+      const glyphs = ['💖','💗','💞','💓','❤️','💕'];
+      function spawnHeart() {
+        const el = document.createElement('div');
+        el.className = 'heart';
+        el.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+        const left = Math.random() * 100;
+        const size = 14 + Math.random() * 20;
+        const duration = 6 + Math.random() * 6;
+        const drift = (Math.random() - 0.5) * 40;
+        el.style.left = left + 'vw';
+        el.style.fontSize = size + 'px';
+        el.style.animationDuration = duration + 's';
+        el.style.transform = `translateX(${drift}px)`;
+        heartsC.appendChild(el);
+        setTimeout(() => el.remove(), duration * 1000);
+      }
+      setInterval(spawnHeart, 520);
+      for (let i = 0; i < 8; i++) spawnHeart();
+    })();
+
+    /* ======= Moving Yes buttons (4 clicks total) ======= */
+    let yesClicks = 0;
+    const requiredClicks = 4;
+    const hint = document.getElementById('clickHint');
+
+    function yesClick(btn) {
+      yesClicks++;
+      updateHint();
+
+      const box = document.getElementById('valentinePlay');
+      const boxRect = box.getBoundingClientRect();
+      const btnRect = btn.getBoundingClientRect();
+
+      const maxLeft = Math.max(0, boxRect.width - btnRect.width - 16);
+      const maxTop  = Math.max(0, boxRect.height - btnRect.height - 16);
+
+      const rX = Math.random();
+      const rY = Math.random();
+      const biasX = rX < 0.5 ? 0 : 1;
+      const biasY = rY < 0.5 ? 0 : 1;
+      const newLeft = Math.floor((biasX ? Math.pow(rX, 0.4) : Math.pow(rX, 2)) * maxLeft);
+      const newTop  = Math.floor((biasY ? Math.pow(rY, 0.4) : Math.pow(rY, 2)) * maxTop);
+
+      btn.style.left = newLeft + 'px';
+      btn.style.top = newTop + 'px';
+      btn.style.transform = 'translate(-50%,-50%) rotate(' + (Math.random()*40-20) + 'deg)';
+
+      if (yesClicks >= requiredClicks) {
+        setTimeout(() => nextScreen(3), 300);
+      }
+    }
+
+    function updateHint() {
+      const left = Math.max(0, requiredClicks - yesClicks);
+      if (left <= 0) hint.textContent = 'Yay! Moving ahead… 💘';
+      else if (left === 1) hint.textContent = 'Bas 1 click aur! 💓';
+      else hint.textContent = `Clicks left: ${left} 💞`;
+    }
+  </script>
+</body>
+</html>
